@@ -1,0 +1,31 @@
+# PadrÃ£o genÃ©rico para dispositivos mÃ³veis no nome do host
+$mobileDevicePattern = "Android|iPhone|iPad|Galaxy|Mobile|Cell|Tablet|Redmi|Xiaomi|Huawei"
+
+# Obter todas as concessÃµes DHCP dentro do escopo especificado
+$leases = Get-DhcpServerv4Lease -ScopeId $scopeID -AllLeases
+
+# Verificar se todas as concessÃµes estÃ£o ocupadas (opcional, se vocÃª deseja verificar antes de remover)
+$currentLeases = $leases.Count
+Write-Host "NÃºmero atual de concessÃµes DHCP: $currentLeases"
+
+# Loop pelas concessÃµes para identificar dispositivos mÃ³veis e removÃª-los
+foreach ($lease in $leases) {
+    # Verificar se o nome do host indica um dispositivo mÃ³vel (critÃ©rio genÃ©rico)
+    if ($lease.HostName -match $mobileDevicePattern) {
+        Write-Host "Removendo dispositivo mÃ³vel com endereÃ§o IP: $($lease.IPAddress)"
+        try {
+            # Remover a concessÃ£o DHCP para o dispositivo mÃ³vel
+            Remove-DhcpServerv4Lease -IPAddress $ipAddressToRemove -ScopeId $scopeID
+        }
+        catch {
+            Write-Host "Erro ao remover concessÃ£o DHCP:"
+            Write-Host "Mensagem de erro: $($_.Exception.Message)"
+            Write-Host "Tipo de exceÃ§Ã£o: $($_.Exception.GetType())"
+            Write-Host "Stack Trace:"
+            Write-Host $_.Exception.StackTrace
+        }
+        
+        
+       
+    }
+}
